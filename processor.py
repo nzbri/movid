@@ -7,7 +7,7 @@ from mediapipe.tasks.python import vision
 
 from task import Task
 
-class ProcessingRun:
+class Processor:
     # this class represents a process in which potentially multiple movement video files will be processed.
     # It will need to have a specified directory of videos to process.
     # Videos can be selectively included or excluded so that previously processed files are not repeated needlessly
@@ -62,5 +62,5 @@ class ProcessingRun:
                 self.input_video_paths.append(path)
 
         for video in self.input_video_paths:
-            task = Task(parent_run = self, video_path = video)
+            task = Task(parent_proc = self, video_path = video)
             task.analyse_video()

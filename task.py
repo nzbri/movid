@@ -17,7 +17,7 @@ class Task:
     # It will also produce a table of numeric coordinates (generally xyz, absolute or normalised) for each landmark on
     # each frame.
 
-    def __init__(self, parent_run, video_path):
+    def __init__(self, parent_proc, video_path):
 
         self.video_in = cv2.VideoCapture(video_path)
         if not self.video_in.isOpened():
@@ -42,7 +42,7 @@ class Task:
         self.video_out = None # not initialised until process_video() called
         # the name of a subfolder where the annotated video will be saved (should be different to the folder containing
         # the original source videos, to avoid over-writing source data):
-        self.video_out_folder_path = parent_run.output_video_folder
+        self.video_out_folder_path = parent_proc.output_video_folder
         self.video_out_filename = self.video_in_filename[:-4] + '_labelled.mp4'
 
         # this 4-byte code controls the video codec to be used. See
@@ -52,10 +52,10 @@ class Task:
         # mp4v compresses less well but gives quality comparable to original colour file:
         self.fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 
-        # from the parent run, we work through its list of detector options (e.g. one each for hands, face, pose) and
+        # from the parent processor, work through its list of detector options (e.g. one each for hands, face, pose) and
         # from each instantiate eg a HandLandmarker object, which needs to be done afresh for each video:
         self.detectors = []
-        for item in parent_run.detector_options:
+        for item in parent_proc.detector_options:
             if item['type'] == 'hands':
                 detector = vision.HandLandmarker.create_from_options(item['options'])
                 self.hand_landmark_names = [mark.name for mark in solutions.hands.HandLandmark]

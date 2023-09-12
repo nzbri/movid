@@ -4,4 +4,4 @@
 
 # make these classes and functions available externally at the top level of this package:
 from movid.task import Task
-from movid.processing_run import ProcessingRun
+from movid.processor import Processor
