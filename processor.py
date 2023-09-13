@@ -18,7 +18,7 @@ class Processor:
     # most of the work is in the init function, which dos all the config and set-up for the process:
     def __init__(self,
                  input_video_folder = 'videos',
-                 specific_videos = None,, # or a list of specific literal file names within input_video_folder
+                 specific_videos = None, # or a list of specific literal file names within input_video_folder
                  track = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands')
                  task_types = ['fta', 'hoc'], # specify at least one
                  output_video_folder = 'annotated_videos',
@@ -39,7 +39,7 @@ class Processor:
         # be processed. They are assumed to be within input_video_folder, so no folder path is required.
 
         if specific_videos is None: # recursively identify all videos in the folder
-            possible_videos = glob.glob(self.input_video_folder, recursive = True)
+            possible_videos = glob.glob(pathname = f'{self.input_video_folder}/*', recursive = True)
 
             for path in possible_videos:
                 pathname, filename = os.path.split(path)
