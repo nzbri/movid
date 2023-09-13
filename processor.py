@@ -15,20 +15,47 @@ class Processor:
     # It will also need to specify a folder in which annotated videos can be saved and where numerical data is stored
     # (i.e. tables of landmark coordinates per frame).
 
+    # most of the work is in the init function, which dos all the config and set-up for the process:
     def __init__(self,
-                 detect = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands')
-                 input_video_folder  = 'videos',
-                 output_video_folder = 'mp_processed_videos',
-                 output_data_folder = 'mp_landmark_data'):
+                 input_video_folder = 'videos',
+                 specific_videos = None,, # or a list of specific literal file names within input_video_folder
+                 track = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands')
+                 task_types = ['fta', 'hoc'], # specify at least one
+                 output_video_folder = 'annotated_videos',
+                 output_data_folder = 'landmark_data'):
 
-        self.input_video_paths = []
         self.input_video_folder = input_video_folder
+        self.input_video_paths = [] # will get populated with the actual video filenames
         self.output_video_folder = output_video_folder
         self.output_data_folder = output_data_folder
 
-        self.detector_options = []
+        # we must always provide a folder in which the source videos can be found.
+        # if specific_videos is None, then that folder will be searched recursively (i.e. including
+        # within any of its sub-folders) to identify all files (all assumed to be valid videos). Only files
+        # that include one of the task types (e.g. 'fta' for finger tapping) will be included in the list
+        # to be processed.
+        # if specific_videos is not None, then it should be a list containing at least one video filename
+        # within that folder. In that case, no recursive search is done, and only the specified files will
+        # be processed. They are assumed to be within input_video_folder, so no folder path is required.
 
-        if 'hands' in detect:
+        if specific_videos is None: # recursively identify all videos in the folder
+            possible_videos = glob.glob(self.input_video_folder, recursive = True)
+
+            for path in possible_videos:
+                pathname, filename = os.path.split(path)
+                for task_type in task_types:
+                    if task_type.lower() in filename.lower():
+                        self.input_video_paths.append(path)
+            print(f'### {len(possible_videos)} videos found. {len(self.input_video_paths)} selected by task.')
+        else: # only get the specified files
+            for filename in specific_videos:
+                path = f'{self.input_video_folder}/{filename}'
+                self.input_video_paths.append(path)
+            print(f'### {len(self.input_video_paths)} videos specified.')
+
+        # create the mediapipe detectors needed for each feature to be tracked (hands, face, etc):
+        self.detector_options = []
+        if 'hands' in track:
             # set options:
             base_hand_options = python.BaseOptions(model_asset_path = 'models/hand_landmarker.task')
             # note the RunningMode.VIDEO setting. This is needed so that information can carry over
@@ -44,23 +71,17 @@ class Processor:
 
             self.detector_options.append({'type': 'hands', 'options': hand_options})
 
-    def process_videos(self, videos, task_types = ['fta']):
-        # input_videos can be a list of literal filenames, in which case they will each get prefixed with the path
-        # to the input video folder.
-        # if it is a single string literal, that is assumed to be the path to a folder and we will iterate recursively
-        # over that folder, collecting all video file names that contain one of the task type strings.
+        # TODO:
+        if 'face' in track:
+            # see the face detection docs here:
+            # https://developers.google.com/mediapipe/solutions/vision/face_landmarker/python
+            pass
 
-        if type(videos) is str:
-            for path in glob.glob(videos, recursive = True):
-                pathname, filename = os.path.split(path)
-                for task_type in task_types:
-                    if task_type in filename:
-                        self.input_video_paths.append(path)
-        elif type(videos) is list:
-            for filename in videos:
-                path = f'{self.input_video_folder}/{filename}'
-                self.input_video_paths.append(path)
-
+    # once the configuration is done, can simply run the process. This is in a separate function so that
+    # it is only invoked once the user has had a chance to see the output of the __init__ function,
+    # which lists the number of videos to be processed. If that 'preflight' shows an incorrect number, it
+    # gives the user a chance to try the config again.
+    def run(self):
         for video in self.input_video_paths:
             task = Task(parent_proc = self, video_path = video)
             task.analyse_video()
