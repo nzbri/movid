@@ -5,5 +5,45 @@ computer vision package to automatically track anatomical landmarks in videos of
 goal is to easily extract quantitative measures of movement disorder symptoms and features.
 
 ## Installation
+- `mediapipe`
+- `movid`
 
 ## Example usage
+
+### Overview
+There are three steps:
+1. Import the `movid` package.
+2. Create and configure a `movid.Processor` to analyse specified videos.
+3. Run it.
+4. Wait. Applying just a hand detector, an M2 MacBook air takes approximately 12 times the duration of a video to 
+   analyse it. This time will grow if multiple features are tracked (e.g. face and hands). An annotated video is
+   exported, as well as a csv of landmark coordinates on each frame.
+
+### Folder structure and organisation
+
+- Put all the videos within one parent folder, which must be specified in the `input_video_folder` parameter.
+  Videos can be flat or nested within sub-folders of that folder - the processor will search the parent folder
+  recursively, so videos can be grouped within sub-folders for each participant, for example.
+- The MediaPipe model files (e.g. `hand_landmarker.task`, `face_landmarker.task`) must be stored together within a
+  specified folder (the `model_folder` parameter).
+- Create and specify the locations of (initially empty) folders to store the annotated videos (`output_video_folder`)
+  and the landmark data files (`output_data_folder`).
+
+Default names for all of those folders are provided in the `movid.Processor` constructor 
+(`'videos'`, `'models'`, `'output_video_folder'`, `'output_data_folder'`).
+
+### Code example
+This simple example will recursively find all videos in the default `'videos'` folder, select only those that are of the
+finger tapping task, and apply the `hand_landmarker.task` MediaPipe model: 
+```python
+import movid
+
+analysis = movid.Processor(track = ['hands'], task_types = ['fta'])
+analysis.run()
+
+```
+
+## TODO
+- Implement other models (currently can only apply `hand_landmarker.task`).
+- Allow compressed csv output.
+- Handle paths properly rather than by concatenating strings.

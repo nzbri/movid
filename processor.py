@@ -21,9 +21,11 @@ class Processor:
                  specific_videos = None, # or a list of specific literal file names within input_video_folder
                  track = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands')
                  task_types = ['fta', 'hoc'], # specify at least one
+                 model_folder = 'models', # MediaPipe model files location
                  output_video_folder = 'annotated_videos',
                  output_data_folder = 'landmark_data'):
 
+        self.model_folder = model_folder
         self.input_video_folder = input_video_folder
         self.input_video_paths = [] # will get populated with the actual video filenames
         self.output_video_folder = output_video_folder
@@ -57,7 +59,7 @@ class Processor:
         self.detector_options = []
         if 'hands' in track:
             # set options:
-            base_hand_options = python.BaseOptions(model_asset_path = 'models/hand_landmarker.task')
+            base_hand_options = python.BaseOptions(model_asset_path = '{self.model_folder}/hand_landmarker.task')
             # note the RunningMode.VIDEO setting. This is needed so that information can carry over
             # from one frame to the next (we also need to provide timestamps). This produces much
             # higher quality results than analysing each frame in isolation, as if it was a still image:
