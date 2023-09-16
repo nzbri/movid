@@ -59,7 +59,7 @@ class Processor:
         self.detector_options = []
         if 'hands' in track:
             # set options:
-            base_hand_options = python.BaseOptions(model_asset_path = '{self.model_folder}/hand_landmarker.task')
+            base_hand_options = python.BaseOptions(model_asset_path = f'{self.model_folder}/hand_landmarker.task')
             # note the RunningMode.VIDEO setting. This is needed so that information can carry over
             # from one frame to the next (we also need to provide timestamps). This produces much
             # higher quality results than analysing each frame in isolation, as if it was a still image:
@@ -77,7 +77,19 @@ class Processor:
         if 'face' in track:
             # see the face detection docs here:
             # https://developers.google.com/mediapipe/solutions/vision/face_landmarker/python
-            pass
+            # set options:
+            base_face_options = python.BaseOptions(model_asset_path = f'{self.model_folder}/face_landmarker.task')
+            # note the RunningMode.VIDEO setting. This is needed so that information can carry over
+            # from one frame to the next (we also need to provide timestamps). This produces much
+            # higher quality results than analysing each frame in isolation, as if it was a still image:
+            face_options = (
+                vision.FaceLandmarkerOptions(base_options = base_face_options,
+                                             running_mode = mp.tasks.vision.RunningMode.VIDEO))
+            # these parameters aren't documented but need to be set to avoid exceptions:
+            face_options.rotation_degrees = 0
+            face_options.region_of_interest = None
+
+            self.detector_options.append({'type': 'face', 'options': face_options})
 
     # once the configuration is done, can simply run the process. This is in a separate function so that
     # it is only invoked once the user has had a chance to see the output of the __init__ function,
