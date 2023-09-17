@@ -43,7 +43,9 @@ class Task:
         # the name of a subfolder where the annotated video will be saved (should be different to the folder containing
         # the original source videos, to avoid over-writing source data):
         self.video_out_folder_path = parent_proc.output_video_folder
-        self.video_out_filename = self.video_in_filename[:-4] + '_labelled.mp4'
+        self.video_out_filename = f'{self.video_in_filename[:-4]}_{parent_proc.features}_labelled.mp4'
+        self.output_data_folder = parent_proc.output_data_folder
+        self.output_data_filename = f'{self.video_in_filename[:-4]}_{parent_proc.features}_csv.gz'
 
         # this 4-byte code controls the video codec to be used. See
         # https://gist.github.com/takuma7/44f9ecb028ff00e2132e for Mac-compatible values.
@@ -77,7 +79,6 @@ class Task:
             cv2.VideoWriter(filename = f'{self.video_out_folder_path}/{self.video_out_filename}', fourcc = self.fourcc,
                             fps = self.fps, frameSize = (self.width, self.height), isColor = True))
 
-        print(f'Processing {self.video_in_filename}')
         start_time = time.time()
 
         while self.video_in.isOpened():
@@ -93,9 +94,10 @@ class Task:
 
                 for detector in self.detectors:
                     #  detect landmarks from the input image:
-                    detection_result = detector['detector'].detect_for_video(image = mp_image,
-                                                                             timestamp_ms = time_stamp,
-                                                                             image_processing_options = detector['options'])
+                    detection_result = (
+                        detector['detector'].detect_for_video(image = mp_image,
+                                                              timestamp_ms = time_stamp,
+                                                              image_processing_options = detector['options']))
 
                     # extract the coordinates:
                     coords = self.get_coords(detection_result, detector['type'])
@@ -119,7 +121,8 @@ class Task:
         self.output_data['task'] = self.task
         self.output_data['date'] = self.date
         self.output_data['subject'] = self.subject
-        self.output_data.to_csv(f'{self.video_out_folder_path}/{self.video_in_filename[:-4]}.csv')
+        self.output_data.to_csv(f'{self.output_data_folder}/{self.output_data_filename}',
+                                index = False)
 
         print(f'  Duration: {round(time_stamp / 1000, 1)}')
         print(f'  Time taken: {round(time.time() - start_time, 1)} s')
@@ -151,8 +154,8 @@ class Task:
                 temp_df['landmark'] = self.hand_landmark_names  # assumed to be in same order from 0 to 20
                 temp_df['side'] = detection_result.handedness[i][0].display_name
             elif detector_type == 'face':
-                temp_df['landmark'] = 'NA (face)'
-                temp_df['side'] = 'NA (face)'
+                temp_df['landmark'] = ''
+                temp_df['side'] = ''
 
             output = pd.concat([output, temp_df], ignore_index = True)
 
@@ -210,7 +213,7 @@ class Task:
                             font_size, handedness_text_colour, font_thickness, cv2.LINE_AA)
 
         if detector_type == 'face':
-            # TODO see https://github.com/googlesamples/mediapipe/blob/main/examples/face_landmarker/python/%5BMediaPipe_Python_Tasks%5D_Face_Landmarker.ipynb
+            # see https://github.com/googlesamples/mediapipe/blob/main/examples/face_landmarker/python/%5BMediaPipe_Python_Tasks%5D_Face_Landmarker.ipynb
 
             for face_landmarks in detection_result.face_landmarks:
                 # Draw the face landmarks.
@@ -223,8 +226,10 @@ class Task:
 
                 solutions.drawing_utils.draw_landmarks(
                     image = annotated_image,
-                    landmark_list = solutions.connection_drawing_spec.face_landmarks_proto,
-                    connections = solutions.face_mesh_connections.FACEMESH_TESSELATION,
-                    connection_drawing_spec = solutions.drawing_styles.get_default_face_mesh_contours_style())
+                    landmark_list = face_landmarks_proto,
+                    connections = solutions.face_mesh.FACEMESH_TESSELATION,
+                    landmark_drawing_spec = None,
+                    connection_drawing_spec = solutions.drawing_utils.DrawingSpec(color = (0, 204, 255), thickness = 1))
+                    #connection_drawing_spec = solutions.drawing_styles.get_default_face_mesh_tesselation_style())
 
         return annotated_image

@@ -9,13 +9,13 @@ from task import Task
 
 class Processor:
     # this class represents a process in which potentially multiple movement video files will be processed.
-    # It will need to have a specified directory of videos to process.
+    # It needs to be given a specified directory of videos to process.
     # Videos can be selectively included or excluded so that previously processed files are not repeated needlessly
     # or to focus only on certain participants or task types.
     # It will also need to specify a folder in which annotated videos can be saved and where numerical data is stored
     # (i.e. tables of landmark coordinates per frame).
 
-    # most of the work is in the init function, which dos all the config and set-up for the process:
+    # most of the work is in the init function, which does all the config and set-up for the process:
     def __init__(self,
                  input_video_folder = 'videos',
                  specific_videos = None, # or a list of specific literal file names within input_video_folder
@@ -37,8 +37,8 @@ class Processor:
         # that include one of the task types (e.g. 'fta' for finger tapping) will be included in the list
         # to be processed.
         # if specific_videos is not None, then it should be a list containing at least one video filename
-        # within that folder. In that case, no recursive search is done, and only the specified files will
-        # be processed. They are assumed to be within input_video_folder, so no folder path is required.
+        # within that folder. In that case, no recursive search is done, and only the specified files (with sub-path
+        # within the parent input_video_folder if necessary) will be processed.
 
         if specific_videos is None: # recursively identify all videos in the folder
             possible_videos = glob.glob(pathname = f'{self.input_video_folder}/*', recursive = True)
@@ -49,11 +49,15 @@ class Processor:
                     if task_type.lower() in filename.lower():
                         self.input_video_paths.append(path)
             print(f'### {len(possible_videos)} videos found. {len(self.input_video_paths)} selected by task.')
-        else: # only get the specified files
+        else:  # only get the specified files
             for filename in specific_videos:
                 path = f'{self.input_video_folder}/{filename}'
                 self.input_video_paths.append(path)
             print(f'### {len(self.input_video_paths)} videos specified.')
+
+        # create a string to use as a suffix for output files, to distinguish output from with different model
+        # combinations:
+        self.features = '-'.join(task_types)
 
         # create the mediapipe detectors needed for each feature to be tracked (hands, face, etc):
         self.detector_options = []
@@ -73,7 +77,6 @@ class Processor:
 
             self.detector_options.append({'type': 'hands', 'options': hand_options})
 
-        # TODO:
         if 'face' in track:
             # see the face detection docs here:
             # https://developers.google.com/mediapipe/solutions/vision/face_landmarker/python
@@ -96,6 +99,7 @@ class Processor:
     # which lists the number of videos to be processed. If that 'preflight' shows an incorrect number, it
     # gives the user a chance to try the config again.
     def run(self):
-        for video in self.input_video_paths:
+        for i, video in enumerate(self.input_video_paths):
             task = Task(parent_proc = self, video_path = video)
+            print(f'Processing {i + 1} of {len(self.input_video_paths)}: {video}')
             task.analyse_video()
