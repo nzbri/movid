@@ -69,4 +69,6 @@ processor.run()
 - Sort the reversing of left and right handedness. Should be simple for hand tracking but may be a bigger issue for 
   pose tracking?
 - Distinguish tasks that have (or don't have) a `_c` suffix.
+- Including the list of features being tracked within each output file name doesn't seem to be working.
 - Give better progress info to the user (such as within-video progress bars).
+- Also log the start date and time of the processing run. Could then estimate the end time of the analysis.
