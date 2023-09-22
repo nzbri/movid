@@ -5,7 +5,7 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from task import Task
+from movid.task import Task
 
 class Processor:
     # this class represents a process in which potentially multiple movement video files will be processed.
