@@ -5,13 +5,44 @@ computer vision package to automatically track anatomical landmarks in videos of
 goal is to easily extract quantitative measures of movement disorder symptoms and features.
 
 ## Installation
-- `mediapipe`
-- `movid`
+
+### From scratch
+
+You can skip this stage if you are happy to install `movid` into your existing Python
+installation. But if you would like to ring-fence it in its own clean environment, so 
+that there are no package dependency conflicts, install Anaconda. Then from the terminal,
+use it to manage environments, including one called, say, `analysis` with Python 
+3.11 installed:
+
+```commandline
+conda create -n analysis python=3.11
+conda activate analysis
+```
+
+
+### The `movid` package
+
+From the terminal, this will install the `movid` package from the default branch 
+(`main`) in its Gitgub repository into your local Python:
+
+```commandline
+pip install git+https://github.com/nzbri/movid.git
+```
+
+This will also install its two stated dependencies (`mediapipe` and `pandas`). Mediapipe 
+will in turn install its own set of dependencies if needed (e.g. OpenCV).
+
+To install some other branch from the repository, append the branch name:
+
+```commandline
+pip install git+https://github.com/nzbri/movid.git@some-branch
+```
 
 ## Example usage
 
 ### Overview
-There are three steps:
+Within a Python `.py` script or Jupyterlab notebook, there are three steps:
+
 1. Import the `movid` package.
 2. Create and configure a `movid.Processor` to analyse specified videos.
 3. Run it.
