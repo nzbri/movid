@@ -93,7 +93,6 @@ processor.run()
 ```
 
 ## TODO
-- Fill in installation instructions in this README.
 - Add face feature number to each line of csv output (as for the hand feature names).
 - Implement pose model (and potentially the "holistic" model).
 - Handle paths properly rather than by concatenating strings.
