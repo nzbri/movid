@@ -1,5 +1,8 @@
 import os
 import glob
+import datetime
+
+from tqdm import tqdm  # for progress bars
 
 import mediapipe as mp
 from mediapipe.tasks import python
@@ -55,9 +58,9 @@ class Processor:
                 self.input_video_paths.append(path)
             print(f'### {len(self.input_video_paths)} videos specified.')
 
-        # create a string to use as a suffix for output files, to distinguish output from with different model
+        # create a string to use as a suffix for output files, to distinguish output when using different model
         # combinations:
-        self.features = '-'.join(task_types)
+        self.features = '-'.join(track)
 
         # create the mediapipe detectors needed for each feature to be tracked (hands, face, etc):
         self.detector_options = []
@@ -99,7 +102,24 @@ class Processor:
     # which lists the number of videos to be processed. If that 'preflight' shows an incorrect number, it
     # gives the user a chance to try the config again.
     def run(self):
+
+        start = datetime.datetime.now()
+        print(f'Started processing at {str(start).split(".")[0]}.')  # remove the microseconds
+
+        files_progress = tqdm(iterable = range(len(self.input_video_paths)),
+                              desc = 'Videos: ',
+                              unit = 'video',
+                              leave = True)
+
         for i, video in enumerate(self.input_video_paths):
             task = Task(parent_proc = self, video_path = video)
-            print(f'Processing {i + 1} of {len(self.input_video_paths)}: {video}')
             task.analyse_video()
+
+            files_progress.write(' ' + video)
+            files_progress.update()
+            files_progress.refresh()
+
+        end = datetime.datetime.now()
+        print(f'Finished processing at {str(end).split(".")[0]}.')
+        duration = end - start
+        print(f'Time taken: {str(duration).split(".")[0]}.')
