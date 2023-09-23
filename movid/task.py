@@ -1,8 +1,9 @@
-import cv2
 import os
-import time
+
+import cv2
 import numpy as np
 import pandas as pd
+from tqdm import tqdm  # for progress bars
 
 import mediapipe as mp
 from mediapipe.tasks.python import vision
@@ -25,6 +26,7 @@ class Task:
             return
 
         self.fps = round(self.video_in.get(cv2.CAP_PROP_FPS), 3)
+        self.num_frames = int(self.video_in.get(cv2.CAP_PROP_FRAME_COUNT))
         self.width = int(self.video_in.get(3))
         self.height = int(self.video_in.get(4))
 
@@ -79,13 +81,19 @@ class Task:
             cv2.VideoWriter(filename = f'{self.video_out_folder_path}/{self.video_out_filename}', fourcc = self.fourcc,
                             fps = self.fps, frameSize = (self.width, self.height), isColor = True))
 
-        start_time = time.time()
+        video_progress = iter(tqdm(iterable = range(self.num_frames),
+                                   desc = ' Feature tracking: ',
+                                   unit = ' frames',
+                                   colour = 'green',
+                                   position = 0,
+                                   leave = True))
 
         while self.video_in.isOpened():
+
             # capture frame-by-frame
             success, bgr_image = self.video_in.read()
-
             if success:
+                next(video_progress)
                 time_stamp = int(self.video_in.get(cv2.CAP_PROP_POS_MSEC))  # time in ms
                 rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
                 mp_image = mp.Image(image_format = mp.ImageFormat.SRGB, data = rgb_image)
@@ -123,10 +131,6 @@ class Task:
         self.output_data['subject'] = self.subject
         self.output_data.to_csv(f'{self.output_data_folder}/{self.output_data_filename}',
                                 index = False)
-
-        print(f'  Duration: {round(time_stamp / 1000, 1)}')
-        print(f'  Time taken: {round(time.time() - start_time, 1)} s')
-        print(f'  Saved as: {self.video_out_filename}')
 
     def get_coords(self, detection_result, detector_type):
         # this function is passed:

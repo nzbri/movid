@@ -46,10 +46,10 @@ Within a Python `.py` script or Jupyterlab notebook, there are three steps:
 1. Import the `movid` package.
 2. Create and configure a `movid.Processor` to analyse specified videos.
 3. Run it.
-4. Wait. Applying just the hand detector, an M2 MacBook Air takes approximately 12 times the duration of a video to 
-   analyse it. This time will grow if multiple features are tracked. For example, processing both the hands and the face
-   takes approximately 33 times the video duration on that laptop. An annotated video is exported, as well as a csv of
-   landmark coordinates on each frame.
+4. Wait. Applying just the hand detector, an M2 MacBook Air processes approximately 18 frames per second, which for a
+   240 Hz recording will take 13 times the duration of the video to complete. This time will grow if multiple features
+   are tracked. For example, processing both the hands and the face takes approximately 33 times the video duration on
+   that laptop. An annotated video is exported, as well as a csv of landmark coordinates on each frame.
 
 ### Folder structure and organisation
 
@@ -99,6 +99,3 @@ processor.run()
 - Sort the reversing of left and right handedness. Should be simple for hand tracking but may be a bigger issue for 
   pose tracking?
 - Distinguish tasks that have (or don't have) a `_c` suffix.
-- Including the list of features being tracked within each output file name doesn't seem to be working.
-- Give better progress info to the user (such as within-video progress bars).
-- Also log the start date and time of the processing run. Could then estimate the end time of the analysis.
