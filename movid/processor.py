@@ -21,10 +21,11 @@ class Processor:
     # most of the work is in the init function, which does all the config and set-up for the process:
     def __init__(self,
                  input_video_folder = 'videos',
-                 specific_videos = None, # or a list of specific literal file names within input_video_folder
+                 specific_videos = None,  # or a list of specific literal file names within input_video_folder
+                 video_suffix = '.MOV',
                  track = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands')
-                 task_types = ['fta', 'hoc'], # specify at least one
-                 model_folder = 'models', # MediaPipe model files location
+                 task_types = ['fta', 'hoc'],  # specify at least one
+                 model_folder = 'models',  # MediaPipe model files location
                  output_video_folder = 'annotated_videos',
                  output_data_folder = 'landmark_data'):
 
@@ -44,7 +45,7 @@ class Processor:
         # within the parent input_video_folder if necessary) will be processed.
 
         if specific_videos is None: # recursively identify all videos in the folder
-            possible_videos = glob.glob(pathname = f'{self.input_video_folder}/*', recursive = True)
+            possible_videos = glob.glob(pathname = f'{self.input_video_folder}/**/*{video_suffix}', recursive = True)
 
             for path in possible_videos:
                 pathname, filename = os.path.split(path)
