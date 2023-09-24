@@ -97,8 +97,9 @@ classifiers = [  # Optional
 # For an analysis of this field vs pip's requirements files see:
 # https://packaging.python.org/discussions/install-requires-vs-requirements/
 dependencies = [ # Optional
-  "mediapipe",
-  "pandas"
+  "mediapipe",  # also installs OpenCV and numpy
+  "pandas",     # for dataframes
+  "tqdm"        # for progress bars
 ]
 
 # List additional groups of dependencies here (e.g. development
