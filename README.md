@@ -71,11 +71,12 @@ read directly by the R `readr::read_csv` function without needing decompression 
 
 ```python
 processor = 
-  movid.Processor(input_video_folder = 'videos',
+  movid.Processor(input_video_folder = 'videos',  # relative to the working directory
                  specific_videos = None, # or a list of specific literal file names within input_video_folder
-                 track = ['hands', 'face', 'pose'],  # specify at least one (currently just 'hands' and/or 'face')
-                 task_types = ['fta', 'hoc'], # specify at least one of the task codes (case-insensitive)
-                 model_folder = 'models', # MediaPipe model files location
+                 video_suffix = '.MOV',  # likely case-sensitive
+                 task_types = ['fta', 'hoc'],  # specify at least one of the filename task codes (case-insensitive)
+                 track = ['hands', 'face', 'pose'],  # specify at least one model (currently just 'hands' and/or 'face')
+                 model_folder = 'models',  # MediaPipe model files location
                  output_video_folder = 'annotated_videos',
                  output_data_folder = 'landmark_data')
 ```
