@@ -88,7 +88,7 @@ finger tapping task, and apply the `hand_landmarker.task` MediaPipe model:
 ```python
 import movid
 
-processor = movid.Processor(track = ['hands'], task_types = ['fta'])
+processor = movid.Processor(task_types = ['fta'], track = ['hands'])
 processor.run()
 
 ```
