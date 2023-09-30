@@ -94,8 +94,10 @@ processor.run()
 ```
 
 ## TODO
-- Add face feature number to each line of csv output (as for the hand feature names).
+- Add face/pose feature number to each line of csv output (as for the hand feature names).
 - Implement pose model (and potentially the "holistic" model).
+- Create separate .csv files for each model so that subsequent runs don't overwrite data from a previous analysis using
+  a different model or mix of models.
 - Handle paths properly rather than by concatenating strings.
 - Sort the reversing of left and right handedness. Should be simple for hand tracking but may be a bigger issue for 
   pose tracking?
