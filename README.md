@@ -23,16 +23,16 @@ conda activate analysis
 ### The `movid` package
 
 From the terminal, this will install the `movid` package from the default branch 
-(`main`) in its Gitgub repository into your local Python:
+(`main`) in its GitHub repository into your local Python:
 
 ```commandline
 pip install git+https://github.com/nzbri/movid.git
 ```
 
-This will also install its two stated dependencies (`mediapipe` and `pandas`). Mediapipe 
-will in turn install its own set of dependencies if needed (e.g. OpenCV).
+This will also install its three stated dependencies (`mediapipe`, `pandas`, and `tqdm`). Mediapipe 
+will in turn install its own extensive set of dependencies if needed (e.g. OpenCV).
 
-To install some other branch from the repository, append the branch name:
+To install some other branch or tag from the repository, append its name:
 
 ```commandline
 pip install git+https://github.com/nzbri/movid.git@some-branch
