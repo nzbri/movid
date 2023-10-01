@@ -45,7 +45,7 @@ class Processor:
         # within that folder. In that case, no recursive search is done, and only the specified files (with sub-path
         # within the parent input_video_folder if necessary) will be processed.
 
-        if specific_videos is None: # recursively identify all videos in the folder
+        if specific_videos is None:  # recursively identify all videos in the folder
             possible_videos = glob.glob(pathname = f'{self.input_video_folder}/**/*{video_suffix}', recursive = True)
 
             for path in possible_videos:
@@ -53,12 +53,19 @@ class Processor:
                 for task_type in task_types:
                     if task_type.lower() in filename.lower():
                         self.input_video_paths.append(path)
-            print(f'### {len(possible_videos)} videos found. {len(self.input_video_paths)} selected by task.')
+            print(f'### {len(possible_videos)} possible videos found.')
         else:  # only get the specified files
             for filename in specific_videos:
                 path = f'{self.input_video_folder}/{filename}'
-                self.input_video_paths.append(path)
-            print(f'### {len(self.input_video_paths)} videos specified.')
+                if os.path.isfile(path):
+                    self.input_video_paths.append(path)
+                else:
+                    print(f'COULD NOT FIND: {path}')
+
+        if (num_files := len(self.input_video_paths)) == 0:
+            print("QUITTING: couldn't find any video files.")
+            quit()
+        print(f'### {num_files} videos selected.')
 
         # create a string to use as a suffix for output files, to distinguish output when using different model
         # combinations:
