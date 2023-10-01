@@ -74,8 +74,9 @@ processor =
   movid.Processor(input_video_folder = 'videos',  # relative to the working directory
                  specific_videos = None, # or a list of specific literal file names within input_video_folder
                  video_suffix = '.MOV',  # likely case-sensitive
-                 task_types = ['fta', 'hoc'],  # specify at least one of the filename task codes (case-insensitive)
-                 track = ['hands', 'face', 'pose'],  # specify at least one model (currently just 'hands' and/or 'face')
+                 task_types = ['fta', 'hoc'],  # if not listing specific videos, give at least one task code to be 
+                                               # searched for in filenames (case-insensitive)
+                 track = ['hands', 'face', 'pose', 'holistic'],  # specify at least one model (holistic not implemented)
                  model_folder = 'models',  # MediaPipe model files location
                  output_video_folder = 'annotated_videos',
                  output_data_folder = 'landmark_data')
