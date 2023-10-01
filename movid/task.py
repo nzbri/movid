@@ -68,6 +68,9 @@ class Task:
             if item['type'] == 'face':
                 detector = vision.FaceLandmarker.create_from_options(item['options'])
 
+            if item['type'] == 'pose':
+                detector = vision.PoseLandmarker.create_from_options(item['options'])
+
             self.detectors.append({'type': item['type'],
                                    'detector': detector,
                                    'options': item['options']})
@@ -146,6 +149,8 @@ class Task:
             features = detection_result.hand_world_landmarks
         elif detector_type == 'face':
             features = detection_result.face_landmarks
+        elif detector_type == 'pose':
+            features = detection_result.pose_world_landmarks
 
         for i, landmarks in enumerate(features):
 
@@ -158,6 +163,10 @@ class Task:
                 temp_df['landmark'] = self.hand_landmark_names  # assumed to be in same order from 0 to 20
                 temp_df['side'] = detection_result.handedness[i][0].display_name
             elif detector_type == 'face':
+                temp_df['landmark'] = ''
+                temp_df['side'] = ''
+            elif detector_type == 'pose':
+                # TODO: get pose landmarker names
                 temp_df['landmark'] = ''
                 temp_df['side'] = ''
 
@@ -235,5 +244,24 @@ class Task:
                     landmark_drawing_spec = None,
                     connection_drawing_spec = solutions.drawing_utils.DrawingSpec(color = (0, 204, 255), thickness = 1))
                     #connection_drawing_spec = solutions.drawing_styles.get_default_face_mesh_tesselation_style())
+
+        if detector_type == 'pose':
+
+            for pose_landmarks in detection_result.pose_landmarks:
+                # Draw the hand landmarks.
+                pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+
+                pose_landmarks_proto.landmark.extend([landmark_pb2.NormalizedLandmark(x = landmark.x,
+                                                                                      y = landmark.y,
+                                                                                      z = landmark.z)
+                                                      for landmark in pose_landmarks])
+
+                solutions.drawing_utils.draw_landmarks(
+                    annotated_image,
+                    pose_landmarks_proto,
+                    solutions.pose.POSE_CONNECTIONS,
+                    solutions.drawing_styles.get_default_pose_landmarks_style(),
+                    #solutions.drawing_styles.get_default_pose_connections_style()
+                )
 
         return annotated_image

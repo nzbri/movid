@@ -24,7 +24,7 @@ class Processor:
                  specific_videos = None,  # or a list of specific literal file names within input_video_folder
                  video_suffix = '.MOV',  # likely case-sensitive
                  task_types = ['fta', 'hoc'],  # specify at least one of the filename task codes (case-insensitive)
-                 track = ['hands', 'face', 'pose'],  # specify at least one model (currently just 'hands' and/or 'face')
+                 track = ['hands', 'face', 'pose', 'holistic'],  # specify at least one model (currently just 'hands' and/or 'face')
                  model_folder = 'models',  # MediaPipe model files location
                  output_video_folder = 'annotated_videos',
                  output_data_folder = 'landmark_data'):
@@ -97,6 +97,21 @@ class Processor:
             face_options.region_of_interest = None
 
             self.detector_options.append({'type': 'face', 'options': face_options})
+
+        if 'pose' in track:
+            # set options:
+            base_pose_options = python.BaseOptions(model_asset_path = f'{self.model_folder}/pose_landmarker_heavy.task')
+            # note the RunningMode.VIDEO setting. This is needed so that information can carry over
+            # from one frame to the next (we also need to provide timestamps). This produces much
+            # higher quality results than analysing each frame in isolation, as if it was a still image:
+            pose_options = (
+                vision.PoseLandmarkerOptions(base_options = base_pose_options,
+                                             running_mode = mp.tasks.vision.RunningMode.VIDEO))
+            # these parameters aren't documented but need to be set to avoid exceptions:
+            pose_options.rotation_degrees = 0
+            pose_options.region_of_interest = None
+
+            self.detector_options.append({'type': 'pose', 'options': pose_options})
 
     # once the configuration is done, can simply run the process. This is in a separate function so that
     # it is only invoked once the user has had a chance to see the output of the __init__ function,
