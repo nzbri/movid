@@ -95,8 +95,8 @@ processor.run()
 ```
 
 ## TODO
-- Add face/pose feature number to each line of csv output (as for the hand feature names).
-- Implement the "holistic" model.
+- Implement the "holistic" model. Might not be feasible - this seems to be waiting on an upgrade path that has already
+  been done for the other models in the MediaPipe project
 - Handle paths properly rather than by concatenating strings.
 - Sort the reversing of left and right handedness. Should be simple for hand tracking but may be a bigger issue for 
   pose tracking?
