@@ -67,9 +67,17 @@ class Task:
 
             if item['type'] == 'face':
                 detector = vision.FaceLandmarker.create_from_options(item['options'])
+                # there doesn't seem to be a list of names of these features, so we just number them.
+                # TODO: Usually said to be 468 but is 478 if irises are tracked: it is dangerous to be hardcoding this.
+                # coerce to strings to avoid occasional floating point import issues later:
+                self.face_landmark_names = [str(i) for i in range(478)]
 
             if item['type'] == 'pose':
                 detector = vision.PoseLandmarker.create_from_options(item['options'])
+                # landmark accuracy and inference latency generally go up with the model
+                # complexity. Would default to 1:
+                detector.model_complexity = 2
+                self.pose_landmark_names = [mark.name for mark in solutions.pose.PoseLandmark]
 
             self.detectors.append({'type': item['type'],
                                    'detector': detector,
@@ -91,12 +99,18 @@ class Task:
                                    position = 0,
                                    leave = True))
 
+        thumbnail_saved = False
+        frame_n = -1
+
         while self.video_in.isOpened():
 
             # capture frame-by-frame
             success, bgr_image = self.video_in.read()
-            if success:
+            if not success:
+                break
+            else:
                 next(video_progress)
+                frame_n += 1
                 time_stamp = int(self.video_in.get(cv2.CAP_PROP_POS_MSEC))  # time in ms
                 rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
                 mp_image = mp.Image(image_format = mp.ImageFormat.SRGB, data = rgb_image)
@@ -122,8 +136,14 @@ class Task:
                                                                    detection_result = detection_result,
                                                                    detector_type = detector['type'])
                 self.video_out.write(annotated_image)
-            else:
-                break
+
+                # save a (hopefully) representative thumbnail at ~ 50% of the way through:
+                if not thumbnail_saved:
+                    if frame_n >= self.num_frames * 0.50:
+                        cv2.imwrite(filename = f'{self.video_out_folder_path}/{self.video_out_filename[:-4]}.jpg',
+                                    img = annotated_image,
+                                    params = [cv2.IMWRITE_JPEG_QUALITY, 85])
+                        thumbnail_saved = True
 
         # tidy up:
         self.video_in.release()
@@ -132,6 +152,7 @@ class Task:
         self.output_data['task'] = self.task
         self.output_data['date'] = self.date
         self.output_data['subject'] = self.subject
+        self.output_data['video'] = self.video_in_filename
         self.output_data.to_csv(f'{self.output_data_folder}/{self.output_data_filename}',
                                 index = False)
 
@@ -163,11 +184,10 @@ class Task:
                 temp_df['landmark'] = self.hand_landmark_names  # assumed to be in same order from 0 to 20
                 temp_df['side'] = detection_result.handedness[i][0].display_name
             elif detector_type == 'face':
-                temp_df['landmark'] = ''
+                temp_df['landmark'] = self.face_landmark_names  # just numbers from 0 to 477
                 temp_df['side'] = ''
             elif detector_type == 'pose':
-                # TODO: get pose landmarker names
-                temp_df['landmark'] = ''
+                temp_df['landmark'] = self.pose_landmark_names  # assumed to be in same order from 0 to 32
                 temp_df['side'] = ''
 
             output = pd.concat([output, temp_df], ignore_index = True)
