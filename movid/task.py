@@ -140,7 +140,7 @@ class Task:
                 if not thumbnail_saved:
                     if frame_n >= self.num_frames / 10:
                         cv2.imwrite(filename = f'{self.video_out_folder_path}/{self.video_out_filename[:-4]}.jpg',
-                                    image = annotated_image)
+                                    img = annotated_image)
                         thumbnail_saved = True
 
         # tidy up:
