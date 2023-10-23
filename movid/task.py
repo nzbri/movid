@@ -136,9 +136,9 @@ class Task:
                                                                    detector_type = detector['type'])
                 self.video_out.write(annotated_image)
 
-                # save a (hopefully) representative thumbnail at ~ 10% of the way through:
+                # save a (hopefully) representative thumbnail at ~ 25% of the way through:
                 if not thumbnail_saved:
-                    if frame_n >= self.num_frames / 10:
+                    if frame_n >= self.num_frames / 25:
                         cv2.imwrite(filename = f'{self.video_out_folder_path}/{self.video_out_filename[:-4]}.jpg',
                                     img = annotated_image)
                         thumbnail_saved = True
