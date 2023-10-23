@@ -68,8 +68,9 @@ class Task:
             if item['type'] == 'face':
                 detector = vision.FaceLandmarker.create_from_options(item['options'])
                 # there doesn't seem to be a list of names of these features, so we just number them.
-                # TODO Usually said to be 468 but is 478 if irises are tracked: a bit dangerous to hardcode this.
-                self.face_landmark_names = list(range(478))
+                # TODO: Usually said to be 468 but is 478 if irises are tracked: it is dangerous to be hardcoding this.
+                # coerce to strings to avoid occasional floating point import issues later:
+                self.face_landmark_names = [str(i) for i in range(478)]
 
             if item['type'] == 'pose':
                 detector = vision.PoseLandmarker.create_from_options(item['options'])
@@ -136,11 +137,12 @@ class Task:
                                                                    detector_type = detector['type'])
                 self.video_out.write(annotated_image)
 
-                # save a (hopefully) representative thumbnail at ~ 25% of the way through:
+                # save a (hopefully) representative thumbnail at ~ 50% of the way through:
                 if not thumbnail_saved:
-                    if frame_n >= self.num_frames / 25:
+                    if frame_n >= self.num_frames * 0.50:
                         cv2.imwrite(filename = f'{self.video_out_folder_path}/{self.video_out_filename[:-4]}.jpg',
-                                    img = annotated_image)
+                                    img = annotated_image,
+                                    params = [cv2.IMWRITE_JPEG_QUALITY, 85])
                         thumbnail_saved = True
 
         # tidy up:

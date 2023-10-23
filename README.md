@@ -12,7 +12,7 @@ You can skip this stage if you are happy to install `movid` into your existing P
 installation. But if you would like to ring-fence it in its own clean environment, so 
 that there are no package dependency conflicts, install Anaconda. Then from the terminal,
 use it to manage environments, including one called, say, `analysis` with Python 
-3.11 installed:
+3.11 installed in it:
 
 ```commandline
 conda create -n analysis python=3.11
@@ -48,8 +48,12 @@ Within a Python `.py` script or Jupyterlab notebook, there are three steps:
 3. Run it.
 4. Wait. Applying just the hand detector, an M2 MacBook Air processes approximately 18 frames per second, which for a
    240 Hz recording will take 13 times the duration of the video to complete. This time will grow if multiple features
-   are tracked. For example, processing both the hands and the face takes approximately 33 times the video duration on
-   that laptop. An annotated video is exported, as well as a csv of landmark coordinates on each frame.
+   are tracked. For example, processing hands, face, and pose runs at approximately 3–5 frames per second on that 
+   laptop. This performance is, however, achieved using only a single core. Substantial improvements might be possible
+   through implementing parallel computing on multiple cores.
+
+   An annotated video is exported along with a hopefully representative .JPG thumbnail (taken at half-way through the 
+   video). Quantitative data is exported as a zipped CSV file of landmark coordinates on each frame.
 
 ### Folder structure and organisation
 
@@ -101,3 +105,7 @@ processor.run()
 - Sort the reversing of left and right handedness. Should be simple for hand tracking but may be a bigger issue for 
   pose tracking?
 - Distinguish tasks that have (or don't have) a `_c` suffix.
+- Increase performance by implementing parallel processing – currently the code is constrained by running on only one 
+  core.
+- Use PCA to get primary axis of finger tapping or other tasks, regardless of hand orientation. Might be best as a
+  post-processing step in R.
